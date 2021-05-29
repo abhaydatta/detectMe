@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DetectMe</string>
+    <string name="video_record">Video Record</string>
 </resources>
