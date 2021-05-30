@@ -5,17 +5,26 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.annotation.GuardedBy
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.passbasedemo.detectme.DetectMeApplication
+import com.passbasedemo.detectme.presenter.util.SharedPrefManager
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
-
+class FaceDetector(
+    private val faceBoundsOverlay: FaceBoundsOverlay
+) {
+    val viewState:MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>().apply {
+            value = false
+        }
+    }
     private val mlkitFaceDetector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
             .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
@@ -42,6 +51,7 @@ class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
     private var isProcessing = false
 
     init {
+       SharedPrefManager.init(DetectMeApplication.instance.applicationContext)
         faceBoundsOverlay.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(view: View?) {
                 faceDetectionExecutor = Executors.newSingleThreadExecutor()
@@ -53,11 +63,6 @@ class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
                 }
             }
         })
-    }
-
-    /** Sets a listener to receive face detection result callbacks. */
-    fun setonFaceDetectionFailureListener(listener: OnFaceDetectionResultListener) {
-        onFaceDetectionResultListener = listener
     }
 
     /**
@@ -133,6 +138,17 @@ class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
         val scaledBottom = scaleY * boundingBox.bottom
         val scaledBoundingBox = RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
 
+        val x0 = SharedPrefManager.read("x0",0F)
+        val y0 = SharedPrefManager.read("y0",0F)
+        val dx = SharedPrefManager.read("dx",0F)
+        val dy = SharedPrefManager.read("dy",0F)
+
+        val cameraOverLayRect = dx?.let {
+            x0?.minus(it)?.let {
+                RectF(it,y0!!-dy!!,x0+dx,y0+dy)
+            }
+        }
+        viewState.value = cameraOverLayRect?.contains(scaledBoundingBox)
         // Return the scaled bounding box and a tracking id of the detected face. The tracking id
         // remains the same as long as the same face continues to be detected.
         return FaceBounds(

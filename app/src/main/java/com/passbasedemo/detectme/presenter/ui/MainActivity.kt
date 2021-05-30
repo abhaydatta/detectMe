@@ -1,32 +1,47 @@
-package com.passbasedemo.detectme
+package com.passbasedemo.detectme.presenter.ui
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.PointF
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
-import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.GuardedBy
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import com.otaliastudios.cameraview.*
 import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
 import com.otaliastudios.cameraview.controls.Preview
+import com.passbasedemo.detectme.R
 import com.passbasedemo.detectme.facedetection.FaceDetector
 import com.passbasedemo.detectme.facedetection.Frame
 import com.passbasedemo.detectme.facedetection.LensFacing
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.lang.Exception
+import java.util.concurrent.locks.Lock
 
 class MainActivity : AppCompatActivity() {
-
+    private val PERMISSION_REQUEST= 1
+    private val lock = Object()
+    @GuardedBy("lock")
+    private var isProcessing = false
     companion object {
         private val LOG = CameraLogger.create("DetectMe")
+        private val TAG = "DetectMe"
 
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        if (!allPermissionGranted()){
+            getRunTimePermissions()
+        }
         setupCamera()
 
     }
@@ -35,6 +50,20 @@ class MainActivity : AppCompatActivity() {
         camera.setLifecycleOwner(this)
         camera.addCameraListener(Listener())
         val faceDetector = FaceDetector(faceBoundsOverlay)
+        faceDetector.viewState.observe(this, Observer {
+              if (it == null){
+                  return@Observer
+              }
+             if (it){
+                 synchronized(lock){
+                     if (!isProcessing){
+                         Log.e(TAG,"start video...")
+                         isProcessing = true
+                         startCaptureVideo()
+                     }
+                 }
+             }
+        })
         camera.facing = Facing.FRONT
         camera.addFrameProcessor {
             faceDetector.process(
@@ -48,9 +77,13 @@ class MainActivity : AppCompatActivity() {
             )
         }
         startVideoButton.setOnClickListener {
-            camera.mode = Mode.VIDEO
-            captureVideoSnapshot()
+            startCaptureVideo()
         }
+    }
+
+    private fun startCaptureVideo(){
+        camera.mode = Mode.VIDEO
+        captureVideoSnapshot()
     }
 
     private fun captureVideo() {
@@ -83,6 +116,10 @@ class MainActivity : AppCompatActivity() {
 
         override fun onVideoTaken(result: VideoResult) {
             super.onVideoTaken(result)
+            isProcessing = false
+            VideoPreviewActivity.videoResult = result
+            val intent = Intent(this@MainActivity,VideoPreviewActivity::class.java)
+            startActivity(intent)
             LOG.w("onVideoTaken called! .")
 
         }
@@ -117,6 +154,67 @@ class MainActivity : AppCompatActivity() {
             LOG.i(content)
             Toast.makeText(this, content, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun getRunTimePermissions() {
+        val allNeededPermission: MutableList<String?> = ArrayList()
+        for (permission in getRequiredPermission()!!) {
+            if (!permission?.let {
+                    isPermissionGranted(
+                        this, it
+                    )
+                }!!) {
+                allNeededPermission.add(permission)
+            }
+        }
+        if (!allNeededPermission.isEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                allNeededPermission.toTypedArray(),
+                PERMISSION_REQUEST
+            )
+        }
+    }
+
+    private fun allPermissionGranted():Boolean{
+        for (permission in this!!.getRequiredPermission()!!){
+            if (!permission?.let {
+                    isPermissionGranted(
+                        this,it
+                    )
+                }!!){
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun getRequiredPermission():Array<String?>?{
+        return try{
+            val info = this.packageManager
+                .getPackageInfo(this.packageName, PackageManager.GET_PERMISSIONS)
+            val ps = info.requestedPermissions
+            if (ps != null && ps.size >0){
+                ps
+            }else{
+                arrayOfNulls(0)
+            }
+        }catch (e:Exception){
+            arrayOfNulls(0)
+        }
+    }
+
+    private fun isPermissionGranted(
+        context: Context,
+        permission: String ):Boolean{
+        if (ContextCompat.checkSelfPermission(context, permission)
+            == PackageManager.PERMISSION_GRANTED
+        ){
+            Log.i(TAG,"Permission granted: $permission")
+            return true
+        }
+        Log.i(TAG,"Permission not granted: $permission")
+        return false
     }
 
 }
