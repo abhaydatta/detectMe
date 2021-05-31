@@ -119,6 +119,7 @@ class MainActivity : AppCompatActivity() {
             isProcessing = false
             VideoPreviewActivity.videoResult = result
             checkView.uncheck()
+            videoPreviewButton.isEnabled = true
             LOG.w("onVideoTaken called! .")
 
         }

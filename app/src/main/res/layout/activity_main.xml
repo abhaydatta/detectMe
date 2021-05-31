@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:keepScreenOn="true">
 
-        <com.otaliastudios.cameraview.overlay.OverlayLayout
+        <com.passbasedemo.detectme.presenter.util.CameraOverLay
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:textSize="25sp"
-            android:text="@string/app_name"
+            android:text="@string/video_text"
             android:textColor="@color/white"/>
         <Button
             android:id="@+id/videoPreviewButton"
