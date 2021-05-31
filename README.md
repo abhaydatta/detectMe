@@ -33,4 +33,5 @@ detectMMe is built on top of MLKit's face detection API and CameraX API's.
 4. Add the user movements to authorize for video snapshot recording
 5. Security Enahncement for data protection
 
-
+#Known issue :
+1.Unable to use Webhook.site as facing some issue while creating URL. However all required files and classes are created for calling any Server API.
