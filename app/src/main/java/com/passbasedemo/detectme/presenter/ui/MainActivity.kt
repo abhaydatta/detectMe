@@ -131,18 +131,18 @@ class MainActivity : AppCompatActivity() {
 
         override fun onVideoRecordingEnd() {
             super.onVideoRecordingEnd()
-            message("Video taken. Processing...", false)
+            //message("Video taken. Processing...", false)
             LOG.w("onVideoRecordingEnd!")
         }
 
         override fun onExposureCorrectionChanged(newValue: Float, bounds: FloatArray, fingers: Array<PointF>?) {
             super.onExposureCorrectionChanged(newValue, bounds, fingers)
-            message("Exposure correction:$newValue", false)
+           // message("Exposure correction:$newValue", false)
         }
 
         override fun onZoomChanged(newValue: Float, bounds: FloatArray, fingers: Array<PointF>?) {
             super.onZoomChanged(newValue, bounds, fingers)
-            message("Zoom:$newValue", false)
+           // message("Zoom:$newValue", false)
         }
     }
 
