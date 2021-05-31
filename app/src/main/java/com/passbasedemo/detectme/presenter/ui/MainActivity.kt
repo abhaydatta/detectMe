@@ -42,9 +42,21 @@ class MainActivity : AppCompatActivity() {
         if (!allPermissionGranted()){
             getRunTimePermissions()
         }
-        setupCamera()
+
 
     }
+
+    override fun onResume() {
+        super.onResume()
+        videoPreviewButton.isEnabled = false
+        setupCamera()
+        videoPreviewButton.setOnClickListener {
+            val intent = Intent(this@MainActivity,VideoPreviewActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+
 
     private fun setupCamera() {
         camera.setLifecycleOwner(this)
@@ -76,23 +88,12 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         }
-        startVideoButton.setOnClickListener {
-            startCaptureVideo()
-        }
+
     }
 
     private fun startCaptureVideo(){
         camera.mode = Mode.VIDEO
         captureVideoSnapshot()
-    }
-
-    private fun captureVideo() {
-        if (camera.mode == Mode.PICTURE) return run {
-            message("Can't record HQ videos while in PICTURE mode.", false)
-        }
-        if (camera.isTakingPicture || camera.isTakingVideo) return
-        message("Recording for 5 seconds...", true)
-        camera.takeVideo(File(filesDir, "video.mp4"), 5000)
     }
 
     private fun captureVideoSnapshot() {
@@ -102,15 +103,14 @@ class MainActivity : AppCompatActivity() {
         if (camera.preview != Preview.GL_SURFACE) return run {
             message("Video snapshots are only allowed with the GL_SURFACE preview.", true)
         }
-        message("Recording snapshot for 5 seconds...", true)
-        camera.takeVideoSnapshot(File(filesDir, "video.mp4"), 5000)
+        camera.takeVideoSnapshot(File(filesDir, "video.mp4"), 3000)
     }
 
     private inner class Listener : CameraListener() {
 
         override fun onCameraError(exception: CameraException) {
             super.onCameraError(exception)
-            message("Got CameraException #" + exception.reason, true)
+           // message("Got CameraException #" + exception.reason, true)
         }
 
 
@@ -118,14 +118,14 @@ class MainActivity : AppCompatActivity() {
             super.onVideoTaken(result)
             isProcessing = false
             VideoPreviewActivity.videoResult = result
-            val intent = Intent(this@MainActivity,VideoPreviewActivity::class.java)
-            startActivity(intent)
+            checkView.uncheck()
             LOG.w("onVideoTaken called! .")
 
         }
 
         override fun onVideoRecordingStart() {
             super.onVideoRecordingStart()
+            checkView.check()
             LOG.w("onVideoRecordingStart!")
         }
 

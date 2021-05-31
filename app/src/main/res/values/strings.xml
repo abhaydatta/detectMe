@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">DetectMe</string>
     <string name="video_record">Video Record</string>
+    <string name="video_text">Position your face into green rectangle to capture video snapshot!</string>
+    <string name="view_recording">View Recording</string>
 </resources>
