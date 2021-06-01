@@ -15,7 +15,7 @@
         <com.passbasedemo.detectme.presenter.util.CameraOverLay
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-             />
+            android:layout_gravity="center"/>
 
         <cdflynn.android.library.checkview.CheckView
             android:id="@+id/checkView"

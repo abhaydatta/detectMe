@@ -25,9 +25,9 @@ class CameraOverLay@JvmOverloads constructor(ctx: Context, attrs: AttributeSet? 
         super.onDraw(canvas)
 
         var x0:Float = canvas.width/2.0F
-        var y0:Float = canvas.width/2.0F
-        var dx:Float = canvas.width/5.0F
-        var dy:Float = canvas.width/5.0F
+        var y0:Float = canvas.height/2.0F
+        var dx:Float = canvas.height/5.0F
+        var dy:Float = canvas.height/5.0F
 
         cameraOverLayRect = RectF(x0-dx, y0-dy,x0+dx,y0+dy)
         canvas.drawRect(cameraOverLayRect,paint)
