@@ -100,7 +100,7 @@ class VideoPreviewActivity : AppCompatActivity() {
     private  fun saveImagetoStorage(
         fileName:String = "screenshot.mp4",
         mimeType: String = "video/mp4",
-        directory:String = Environment.DIRECTORY_DOWNLOADS,
+        directory:String = Environment.DIRECTORY_MOVIES,
         mediaContentUri:Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     ){
         val videoOutStream:OutputStream
