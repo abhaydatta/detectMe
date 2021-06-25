@@ -1,5 +1,4 @@
 # detectMe
-Android App Build Link : https://i.diawi.com/rHFbCq
 
 detectMe is a face detection Android application which can be used to detect the face using Front Camera and also allow us to record the video.
 detectMMe is built on top of MLKit's face detection API and CameraX API's.
@@ -35,5 +34,3 @@ detectMMe is built on top of MLKit's face detection API and CameraX API's.
 4. Add the user movements to authorize for video snapshot recording
 5. Security Enahncement for data protection
 
-#Known issue :
-1.Unable to use Webhook.site as facing some issue while creating URL. However all required files and classes are created for calling any Server API.
